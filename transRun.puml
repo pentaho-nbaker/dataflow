@@ -1,0 +1,19 @@
+@startuml
+
+actor "PDI Dev"
+"PDI Dev" -> Spoon: Set Trans Executor
+Spoon -> PluginRegistry: Load Executor 'Spark'
+PluginRegistry -> "Spark Engine":new
+"Spark Engine" -> PluginRegistry: Load Spark Plugins
+Spoon -> "Spark Engine": PrepareTrans
+"Spark Engine" -> "Spark Engine": Resolve natives
+"Spark Engine" -> "Spark Engine": Determine Default Parallelism
+"Spark Engine" -> "Spark Engine": Check Step Blacklist
+"Spark Engine" -> "Spark Engine": Flag Steps using unsupported features
+"Spark Engine" -> "Materialization Plan": create
+"Spark Engine" <- "Materialization Plan"
+"Spark Engine" -> "Spoon": Return Materialization Plan
+Spoon -> Spoon: Render Materialization in UI
+"PDI Dev" -> Spoon: Override default\n materialization\n as needed
+
+@enduml
