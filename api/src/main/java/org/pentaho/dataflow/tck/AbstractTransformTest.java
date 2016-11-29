@@ -54,13 +54,13 @@ public abstract class AbstractTransformTest {
     public void testTransform() throws Exception {
 
        Transform transform = createTransform();
-        int numOfSteps = 3;
+        int numOfSteps = 30;
 
         for (int j = 0; j < numOfSteps; j++) {
             transform.next( this::stepFunc );
         }
 
-        TableModel model = generateTableModel(20/*cols*/, 100_000/*rows*/);
+        TableModel model = generateTableModel(20/*cols*/, 5_000/*rows*/);
 
         transform.prepare();
 

@@ -1,0 +1,107 @@
+@startuml
+
+
+interface IExecutionContext {
++Map<String, Object> getParameters()
++Map<String, Object> getEnvironment()
++IEngine getEngine()
+}
+IEngine -- IExecutionContext
+
+class SparkExecutionContext {
++setDefaultParallelism( int )
+}
+
+IExecutionContext <|-- SparkExecutionContext
+
+interface IExecutionResultFuture {
+Returned by IEngine.execute()
+..
+Supports blocking calls
+and Reactive Async
+--
++getExecutionContext()
++getTransformation()
+}
+
+interface IExecutionResult<T> extends IProgressReporting {
+
++Status getStatus()
+returns FINISHED
++IData<T> getData();
+
+}
+
+IExecutionResultFuture --|> Future
+IExecutionResultFuture --|> IProgressReporting
+IEngine -right- IExecutionResultFuture
+IEngine -right- IExecutionResult
+
+
+interface Future
+interface IProgressReporting{
++int getIn()
++int getOut()
++int getDropped()
++int getInFlight()
++Status getStatus()
+}
+
+interface ITransformation extends IProgressReporting {
++Set<IStep> getSteps()
+}
+
+interface IStep extends IProgressReporting {
++boolean isLimitable();
++boolean isAggregating();
++String getName();
++Set<IHop> getHopsIn();
++Set<IHop> getHopsOut();
+}
+
+interface IHop {
++IStep getFrom()
++IStep getTo()
++String getType()
+
+}
+
+
+
+interface IPDIEventSource {
+
+}
+
+interface Publisher {
+Reactive Streams interface
+}
+IPDIEventSource --|> Publisher
+IProgressReporting --|> IPDIEventSource
+
+IProgressReporting -- Status
+
+enum Status{
+    STOPPED
+    RUNNING
+    PAUSED
+    FINISHED
+}
+
+interface IEngine{
+ +prepare()
+ +execute()
+}
+
+class SparkEngine {
+
+}
+
+IEngine <|-- SparkEngine
+
+@enduml
+
+
+@startuml
+
+
+@enduml

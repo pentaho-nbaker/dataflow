@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -37,7 +38,11 @@ public class DisruptorTransform extends BaseTransform {
     @Override
     public void shutdown() {
         for (Disruptor<DataRow> dataRowDisruptor : disruptors.values()) {
-            dataRowDisruptor.shutdown();
+            try {
+                dataRowDisruptor.shutdown(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
         }
     }
 

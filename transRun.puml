@@ -1,19 +1,49 @@
 @startuml
 
 actor "PDI Dev"
+"PDI Dev" -> "Trans Meta": Load
 "PDI Dev" -> Spoon: Set Trans Executor
+    activate Spoon
 Spoon -> PluginRegistry: Load Executor 'Spark'
+    activate PluginRegistry
 PluginRegistry -> "Spark Engine":new
+    activate "Spark Engine"
 "Spark Engine" -> PluginRegistry: Load Spark Plugins
+    deactivate "Spark Engine"
+PluginRegistry -> Spoon
+    deactivate PluginRegistry
 Spoon -> "Spark Engine": PrepareTrans
-"Spark Engine" -> "Spark Engine": Resolve natives
-"Spark Engine" -> "Spark Engine": Determine Default Parallelism
-"Spark Engine" -> "Spark Engine": Check Step Blacklist
-"Spark Engine" -> "Spark Engine": Flag Steps using unsupported features
-"Spark Engine" -> "Materialization Plan": create
-"Spark Engine" <- "Materialization Plan"
-"Spark Engine" -> "Spoon": Return Materialization Plan
-Spoon -> Spoon: Render Materialization in UI
-"PDI Dev" -> Spoon: Override default\n materialization\n as needed
+    activate "Spark Engine"
+note right: -Resolve Natives\n-Determine Parallelized Branches\n-Check Step Blacklist\n-Flag steps using unsupported \n features
 
+
+"Spark Engine" -> "Materialization Plan": create
+    activate "Materialization Plan"
+"Spark Engine" <- "Materialization Plan"
+    deactivate "Materialization Plan"
+"Spark Engine" -> "Spoon": Return Materialization Plan
+    deactivate "Spark Engine"
+Spoon -> Spoon: Render Materialization in UI
+    deactivate Spoon
+"PDI Dev" -> "Trans Meta": Override default\n materialization\n as needed
+"PDI Dev" -> Spoon: Run Transformation
+    activate Spoon
+Spoon -> "Spark Engine": execute
+Spoon <- "Spark Engine"
+    deactivate Spoon
+
+@enduml
+
+@startuml
+
+actor Client
+Client -> Engine: execute()
+Engine -> Engine: materialize()
+loop Walk Trans DAG
+    Engine --> PluginRegistry: Check for Available Native
+note right: Execution Hints can override default logic
+    Engine --> Engine: Determine Parallelization
+    Engine --> Engine: Group with previous Steps if \n same parallelization
+
+end
 @enduml
